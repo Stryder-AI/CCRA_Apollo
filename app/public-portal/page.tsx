@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import {
   Leaf, Search, Shield, ShieldCheck, CheckCircle2, Clock, FileText,
@@ -8,7 +9,7 @@ import {
   Package, MapPin, Phone, Mail, Building2, Calendar, AlertCircle,
   Sprout, FlaskConical, Factory, Truck, Microscope, Box, ArrowRight,
   Star, BadgeCheck, Globe, Hash, Scale, ClipboardCheck, HelpCircle,
-  X
+  X, PenLine
 } from 'lucide-react'
 import { farms } from '@/data/mock-farms'
 import { batches } from '@/data/mock-traceability'
@@ -173,6 +174,41 @@ function HeroSection() {
               <BarChart3 className="h-3.5 w-3.5" /> AI-Powered Monitoring
             </span>
           </div>
+
+          {/* Apply for License CTA */}
+          <div className="mt-8">
+            <Link
+              href="/licensing/apply"
+              className="inline-flex items-center gap-3 bg-white text-green-800 font-bold text-lg px-10 py-4 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 group"
+            >
+              <PenLine className="h-6 w-6" />
+              Apply for a Cannabis License
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <p className="text-green-200 text-xs mt-3">9 license categories available — Cultivation, Processing, Research, Export & more</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Apply Banner — Standalone CTA */}
+      <div className="mb-8 rounded-2xl border-2 border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 p-8 shadow-lg">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-5">
+            <div className="h-16 w-16 rounded-2xl bg-green-600 flex items-center justify-center shadow-md flex-shrink-0">
+              <PenLine className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-green-900">Ready to Apply for a License?</h2>
+              <p className="text-gray-600 mt-1">Start your application online — 9 license categories including Cultivation, Processing, Testing, Distribution, Research, Export/Import, and more.</p>
+            </div>
+          </div>
+          <Link
+            href="/licensing/apply"
+            className="flex-shrink-0 inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 group"
+          >
+            Start Application
+            <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </div>
 
@@ -185,7 +221,23 @@ function HeroSection() {
       </div>
 
       {/* Quick Access Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Link href="/licensing/apply" className="block group">
+          <div className={cn(
+            'relative overflow-hidden rounded-xl border-2 border-green-500 bg-green-50 p-6 shadow-md',
+            'hover:shadow-xl transition-all duration-300 hover:border-green-600 h-full'
+          )}>
+            <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/10 rounded-bl-full" />
+            <div className={cn('h-12 w-12 rounded-xl flex items-center justify-center mb-4 bg-green-600')}>
+              <PenLine className="h-6 w-6 text-white" />
+            </div>
+            <h3 className="text-lg font-bold text-green-900 mb-2 group-hover:text-green-700">Apply for a License</h3>
+            <p className="text-sm text-gray-600 leading-relaxed">Submit your cannabis license application online. 9 categories available with step-by-step guidance.</p>
+            <div className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-green-700 group-hover:gap-2 transition-all">
+              Start Now <ArrowRight className="h-4 w-4" />
+            </div>
+          </div>
+        </Link>
         <QuickAccessCard
           icon={Search}
           title="Track Your Application"
