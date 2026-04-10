@@ -3,17 +3,16 @@
 import Link from 'next/link'
 import { GlassCard } from '@/design-system/glass-card'
 import { licenses } from '@/data/mock-licenses'
+import { LICENSE_CATEGORIES } from '@/config/constants'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 
-const COLORS = ['#22c55e', '#14b8a6', '#eab308', '#3b82f6']
+const COLORS = ['#22c55e', '#14b8a6', '#eab308', '#3b82f6', '#a855f7', '#f97316', '#ec4899', '#06b6d4', '#84cc16']
 
 export function LicensesPieChart() {
-  const data = [
-    { name: 'Cultivation', value: licenses.filter((l) => l.type === 'Cultivation').length },
-    { name: 'Extraction', value: licenses.filter((l) => l.type === 'Extraction').length },
-    { name: 'Manufacturing', value: licenses.filter((l) => l.type === 'Manufacturing').length },
-    { name: 'Sales & Distribution', value: licenses.filter((l) => l.type === 'Sales & Distribution').length },
-  ]
+  const data = LICENSE_CATEGORIES.map((cat) => ({
+    name: cat.label,
+    value: licenses.filter((l) => l.category === cat.value).length,
+  })).filter((d) => d.value > 0)
 
   const total = data.reduce((acc, d) => acc + d.value, 0)
 
@@ -49,8 +48,8 @@ export function LicensesPieChart() {
           {data.map((item, index) => (
             <div key={item.name} className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: COLORS[index] }} />
-                <span className="text-muted-foreground">{item.name}</span>
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: COLORS[index % COLORS.length] }} />
+                <span className="text-muted-foreground text-xs">{item.name}</span>
               </div>
               <span className="font-mono font-medium">{item.value}</span>
             </div>

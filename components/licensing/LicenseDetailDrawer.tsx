@@ -18,9 +18,10 @@ import { GlassCard } from '@/design-system/glass-card'
 import { AiReviewPanel } from '@/components/ai/AiReviewPanel'
 import { DocumentViewer } from '@/components/shared/DocumentViewer'
 import { licenseReviews, defaultReview } from '@/data/mock-license-reviews'
-import { STATUS_COLORS } from '@/config/constants'
+import { APPLICATION_STATUS_CONFIG } from '@/config/constants'
+import { getLicenseCategoryShortLabel, getTierLabel } from '@/utils/license-helpers'
 import { formatCurrency, formatDateShort } from '@/utils/format'
-import { LicenseStatus } from '@/types/license'
+import type { ApplicationStatus } from '@/types/license'
 import { toast } from 'sonner'
 import {
   ResponsiveContainer,
@@ -40,6 +41,8 @@ import {
   XCircle,
   AlertCircle,
   TrendingUp,
+  Shield,
+  Layers,
 } from 'lucide-react'
 
 const licenseComplianceTrend = [
@@ -51,23 +54,21 @@ const licenseComplianceTrend = [
   { inspection: 'Mar 26', score: 92 },
 ]
 
-const statusBadgeClass: Record<LicenseStatus, string> = {
-  active:
-    'bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30',
-  pending:
-    'bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-500/30',
-  suspended:
-    'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30',
-  revoked:
-    'bg-gray-500/15 text-gray-700 dark:text-gray-400 border-gray-500/30',
-  expired:
-    'bg-gray-500/15 text-gray-700 dark:text-gray-400 border-gray-500/30',
-  'under-review':
-    'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30',
-  approved:
-    'bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30',
-  rejected:
-    'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30',
+function StatusBadge({ status }: { status: ApplicationStatus }) {
+  const config = APPLICATION_STATUS_CONFIG[status]
+  if (!config) return <Badge variant="outline">{status}</Badge>
+  return (
+    <Badge
+      variant="outline"
+      style={{
+        backgroundColor: config.bgColor,
+        color: config.color,
+        borderColor: config.borderColor,
+      }}
+    >
+      {config.label}
+    </Badge>
+  )
 }
 
 const timelineEvents = [
@@ -142,15 +143,13 @@ export function LicenseDetailDrawer() {
 
                 {/* ---- Overview Tab ---- */}
                 <TabsContent value="overview" className="mt-4 space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant="outline"
-                      className={statusBadgeClass[license.status]}
-                    >
-                      {license.status.replace('-', ' ')}
-                    </Badge>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <StatusBadge status={license.status} />
                     <Badge variant="outline">
-                      {license.type}
+                      {getLicenseCategoryShortLabel(license.category)}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {getTierLabel(license.category, license.tier)}
                     </Badge>
                   </div>
 
@@ -166,9 +165,19 @@ export function LicenseDetailDrawer() {
                       value={license.companyName}
                     />
                     <InfoRow
+                      icon={<Layers className="h-4 w-4" />}
+                      label="Entity Type"
+                      value={license.entityType}
+                    />
+                    <InfoRow
                       icon={<MapPin className="h-4 w-4" />}
                       label="Region"
                       value={license.region}
+                    />
+                    <InfoRow
+                      icon={<Shield className="h-4 w-4" />}
+                      label="Province"
+                      value={license.province}
                     />
                     <InfoRow
                       icon={<Banknote className="h-4 w-4" />}
@@ -199,6 +208,17 @@ export function LicenseDetailDrawer() {
                       }
                     />
                   </div>
+
+                  {(license.secpNumber || license.ntn) && (
+                    <div className="grid grid-cols-2 gap-3 border-t border-white/10 pt-3">
+                      {license.secpNumber && (
+                        <InfoRow icon={<FileText className="h-4 w-4" />} label="SECP #" value={license.secpNumber} />
+                      )}
+                      {license.ntn && (
+                        <InfoRow icon={<FileText className="h-4 w-4" />} label="NTN" value={license.ntn} />
+                      )}
+                    </div>
+                  )}
 
                   {license.notes && (
                     <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
@@ -333,7 +353,7 @@ export function LicenseDetailDrawer() {
                     size="sm"
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                     onClick={() => {
-                      updateLicense(license.id, { status: 'approved' })
+                      updateLicense(license.id, { status: 'APPROVED' })
                       toast.success(
                         `License ${license.licenseNumber} approved`
                       )
@@ -348,30 +368,30 @@ export function LicenseDetailDrawer() {
                     variant="outline"
                     className="flex-1 text-red-600 hover:text-red-700 border-red-500/30 hover:bg-red-500/10"
                     onClick={() => {
-                      updateLicense(license.id, { status: 'rejected' })
+                      updateLicense(license.id, { status: 'DENIED' })
                       toast.error(
-                        `License ${license.licenseNumber} rejected`
+                        `License ${license.licenseNumber} denied`
                       )
                       setSelectedLicense(null)
                     }}
                   >
                     <XCircle className="h-4 w-4 mr-1" />
-                    Reject
+                    Deny
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     className="flex-1 text-amber-600 hover:text-amber-700 border-amber-500/30 hover:bg-amber-500/10"
                     onClick={() => {
-                      updateLicense(license.id, { status: 'under-review' })
+                      updateLicense(license.id, { status: 'RFI_ISSUED' })
                       toast.info(
-                        `Changes requested for ${license.licenseNumber}`
+                        `RFI issued for ${license.licenseNumber}`
                       )
                       setSelectedLicense(null)
                     }}
                   >
                     <AlertCircle className="h-4 w-4 mr-1" />
-                    Request Changes
+                    Request Info
                   </Button>
                 </div>
               </PermissionGate>

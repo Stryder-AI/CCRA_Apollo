@@ -2,14 +2,22 @@
 
 import { Input } from '@/components/ui/input'
 import { useLicenseStore } from '@/store/useLicenseStore'
+import { LICENSE_CATEGORIES, APPLICATION_STATUS_CONFIG } from '@/config/constants'
 import { Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-const LICENSE_TYPES = ['Cultivation', 'Extraction', 'Manufacturing', 'Sales & Distribution']
-const LICENSE_STATUSES = ['active', 'pending', 'expired', 'suspended', 'revoked', 'under-review', 'approved', 'rejected']
+import type { ApplicationStatus } from '@/types/license'
 
 const selectClasses =
   'h-8 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
+
+const STATUS_GROUPS: { group: string; statuses: ApplicationStatus[] }[] = [
+  { group: 'Pre-Application', statuses: ['DRAFT'] },
+  { group: 'Submission', statuses: ['SUBMITTED'] },
+  { group: 'Review', statuses: ['UNDER_REVIEW_SCREENING', 'RFI_ISSUED', 'UNDER_REVIEW_TECHNICAL'] },
+  { group: 'Clearance', statuses: ['SECURITY_CLEARANCE_PENDING', 'INSPECTION_SCHEDULED', 'INSPECTION_COMPLETE'] },
+  { group: 'Decision', statuses: ['APPROVED', 'APPROVED_WITH_CONDITIONS', 'DENIED'] },
+  { group: 'Post-Issue', statuses: ['SUSPENDED', 'REVOKED', 'EXPIRED', 'LAPSED', 'RENEWAL_IN_PROGRESS'] },
+]
 
 export function LicenseFilters() {
   const searchQuery = useLicenseStore((s) => s.searchQuery)
@@ -34,12 +42,12 @@ export function LicenseFilters() {
       <select
         value={filterType}
         onChange={(e) => setFilterType(e.target.value)}
-        className={cn(selectClasses, 'min-w-[160px]')}
+        className={cn(selectClasses, 'min-w-[180px]')}
       >
-        <option value="">All Types</option>
-        {LICENSE_TYPES.map((t) => (
-          <option key={t} value={t}>
-            {t}
+        <option value="">All Categories</option>
+        {LICENSE_CATEGORIES.map((c) => (
+          <option key={c.value} value={c.value}>
+            {c.label}
           </option>
         ))}
       </select>
@@ -47,13 +55,17 @@ export function LicenseFilters() {
       <select
         value={filterStatus}
         onChange={(e) => setFilterStatus(e.target.value)}
-        className={cn(selectClasses, 'min-w-[150px]')}
+        className={cn(selectClasses, 'min-w-[200px]')}
       >
         <option value="">All Statuses</option>
-        {LICENSE_STATUSES.map((s) => (
-          <option key={s} value={s} className="capitalize">
-            {s.replace('-', ' ')}
-          </option>
+        {STATUS_GROUPS.map((g) => (
+          <optgroup key={g.group} label={g.group}>
+            {g.statuses.map((s) => (
+              <option key={s} value={s}>
+                {APPLICATION_STATUS_CONFIG[s].label}
+              </option>
+            ))}
+          </optgroup>
         ))}
       </select>
     </div>

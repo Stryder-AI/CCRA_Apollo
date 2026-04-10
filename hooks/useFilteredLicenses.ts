@@ -18,7 +18,7 @@ export function useFilteredLicenses(): License[] {
           license.licenseNumber.toLowerCase().includes(q)
         if (!match) return false
       }
-      if (filterType && license.type !== filterType) return false
+      if (filterType && license.category !== filterType) return false
       if (filterStatus && license.status !== filterStatus) return false
       return true
     })

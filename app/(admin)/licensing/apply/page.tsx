@@ -7,35 +7,47 @@ import { PageTransition } from '@/design-system/page-transition'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { WizardShell } from '@/components/licensing/wizard/WizardShell'
-import type { WizardFormData } from '@/components/licensing/wizard/WizardShell'
+import { useApplicationWizardStore } from '@/store/useApplicationWizardStore'
 import { useLicenseStore } from '@/store/useLicenseStore'
-import { FEE_SCHEDULE } from '@/config/constants'
+import { generateApplicationReference, generateLicenseNumber } from '@/utils/license-helpers'
 import { ArrowLeft } from 'lucide-react'
 import type { License } from '@/types/license'
 
 export default function ApplyPage() {
   const router = useRouter()
   const addLicense = useLicenseStore((s) => s.addLicense)
+  const wizardStore = useApplicationWizardStore()
 
-  const handleSubmit = (data: WizardFormData) => {
-    const fee = FEE_SCHEDULE.find((f) => f.type === data.licenseType)
+  const handleSubmit = () => {
+    const { category, tier, businessEntity, feeBreakdown } = wizardStore
+
+    if (!category || !tier) return
 
     const newLicense: License = {
       id: crypto.randomUUID(),
-      licenseNumber: `CCRA-${Date.now().toString(36).toUpperCase()}`,
-      type: data.licenseType,
-      applicantName: data.fullName,
-      companyName: data.companyName,
-      region: data.region,
-      status: 'pending',
+      licenseNumber: generateLicenseNumber(),
+      type: category,
+      category,
+      tier,
+      applicantName: businessEntity.legalEntityName,
+      companyName: businessEntity.legalEntityName,
+      entityType: businessEntity.entityType,
+      region: businessEntity.registeredAddress.district || businessEntity.registeredAddress.province || 'N/A',
+      province: businessEntity.registeredAddress.province || 'N/A',
+      status: 'SUBMITTED',
       applicationDate: new Date().toISOString().split('T')[0],
-      feePaidPKR: fee?.application ?? 0,
+      feePaidPKR: feeBreakdown?.totalDueNow ?? 0,
       documents: [],
+      applicationId: generateApplicationReference(),
+      secpNumber: businessEntity.secpRegistrationNumber || undefined,
+      ntn: businessEntity.ntn || undefined,
     }
 
     addLicense(newLicense)
-    toast.success('Application submitted successfully', {
-      description: `License ${newLicense.licenseNumber} has been created and is pending review.`,
+    wizardStore.resetWizard()
+
+    toast.success('Application Submitted Successfully', {
+      description: `Reference: ${newLicense.applicationId ?? newLicense.licenseNumber}. Your application is now under review.`,
     })
     router.push('/licensing')
   }
@@ -43,7 +55,7 @@ export default function ApplyPage() {
   return (
     <PageTransition>
       <div className="space-y-6">
-        <PageHeader title="New License Application" description="Complete all steps to submit your application">
+        <PageHeader title="New License Application" description="Complete all steps to submit your CCRA cannabis license application">
           <Link href="/licensing">
             <Button variant="outline">
               <ArrowLeft className="size-4 mr-1" />

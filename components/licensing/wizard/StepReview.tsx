@@ -1,68 +1,169 @@
 'use client'
 
-import { useFormContext } from 'react-hook-form'
-import { FEE_SCHEDULE } from '@/config/constants'
+import { useState } from 'react'
+import { useApplicationWizardStore } from '@/store/useApplicationWizardStore'
+import { getLicenseCategoryLabel, getTierLabel } from '@/utils/license-helpers'
 import { formatCurrencyFull } from '@/utils/format'
-import type { WizardFormData } from './WizardShell'
+import { LICENSE_TYPE_CONFIGS } from '@/config/license-type-config'
+import { ChevronDown, Edit2, CheckCircle } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-function ReviewSection({ title, children }: { title: string; children: React.ReactNode }) {
+interface SectionProps {
+  title: string
+  step: number
+  onEdit: (step: number) => void
+  children: React.ReactNode
+}
+
+function ReviewSection({ title, step, onEdit, children }: SectionProps) {
+  const [isOpen, setIsOpen] = useState(true)
   return (
-    <div className="space-y-2">
-      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{title}</h3>
-      <div className="rounded-lg border border-white/10 p-4 space-y-1.5">{children}</div>
+    <div className="rounded-lg border border-white/10 overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between p-3 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <CheckCircle className="size-4 text-green-500" />
+          <span className="text-sm font-semibold">{title}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onEdit(step) }}
+            className="flex items-center gap-1 text-xs text-green-500 hover:underline"
+          >
+            <Edit2 className="size-3" /> Edit
+          </button>
+          <ChevronDown className={cn('size-4 text-muted-foreground transition-transform', isOpen && 'rotate-180')} />
+        </div>
+      </button>
+      {isOpen && (
+        <div className="p-4 border-t border-white/10 text-sm space-y-2">
+          {children}
+        </div>
+      )}
     </div>
   )
 }
 
-function ReviewRow({ label, value }: { label: string; value: string }) {
+function Row({ label, value }: { label: string; value: string | undefined }) {
+  if (!value) return null
   return (
-    <div className="flex justify-between text-sm">
+    <div className="flex justify-between py-1">
       <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium">{value}</span>
+      <span className="font-medium text-right max-w-[60%]">{value}</span>
     </div>
   )
 }
 
 export function StepReview() {
-  const { getValues } = useFormContext<WizardFormData>()
-  const data = getValues()
+  const store = useApplicationWizardStore()
+  const {
+    category, tier, businessEntity, ownershipControl, keyPersonnel,
+    siteFacility, commonDocuments, feeBreakdown, paymentMethod,
+    certificationAccepted, setCertification, setCurrentStep,
+  } = store
 
-  const fee = FEE_SCHEDULE.find((f) => f.type === data.licenseType)
+  const config = category ? LICENSE_TYPE_CONFIGS[category] : null
+  const uploadedDocsCount = Object.values(commonDocuments).filter(Boolean).length
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold">Review Your Application</h2>
+        <h2 className="text-lg font-semibold">Review & Submit</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Please review all information before submitting.
+          Review all information before submitting your application. Click &quot;Edit&quot; to make changes to any section.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ReviewSection title="License Type">
-          <ReviewRow label="Type" value={data.licenseType || '—'} />
-          {fee && <ReviewRow label="Annual Fee" value={formatCurrencyFull(fee.annual)} />}
-          {fee && <ReviewRow label="Application Fee" value={formatCurrencyFull(fee.application)} />}
-        </ReviewSection>
+      {/* Step 1: Licence Type */}
+      <ReviewSection title="Licence Type & Tier" step={1} onEdit={setCurrentStep}>
+        <Row label="Category" value={category ? getLicenseCategoryLabel(category) : undefined} />
+        <Row label="Tier" value={category && tier ? getTierLabel(category, tier) : undefined} />
+        {config && <Row label="Permitted Activities" value={config.permittedActivities} />}
+      </ReviewSection>
 
-        <ReviewSection title="Applicant Information">
-          <ReviewRow label="Full Name" value={data.fullName || '—'} />
-          <ReviewRow label="Company" value={data.companyName || '—'} />
-          <ReviewRow label="CNIC" value={data.cnic || '—'} />
-          <ReviewRow label="Phone" value={data.phone || '—'} />
-          <ReviewRow label="Email" value={data.email || '—'} />
-        </ReviewSection>
+      {/* Step 2: Business Entity */}
+      <ReviewSection title="Business Entity Information" step={2} onEdit={setCurrentStep}>
+        <Row label="Legal Entity Name" value={businessEntity.legalEntityName} />
+        <Row label="Entity Type" value={businessEntity.entityType} />
+        <Row label="SECP #" value={businessEntity.secpRegistrationNumber} />
+        <Row label="NTN" value={businessEntity.ntn} />
+        <Row label="Date of Incorporation" value={businessEntity.dateOfIncorporation} />
+        <Row label="Province" value={businessEntity.registeredAddress.province} />
+        <Row label="District" value={businessEntity.registeredAddress.district} />
+        <Row label="Business Phone" value={businessEntity.businessPhone} />
+        <Row label="Business Email" value={businessEntity.businessEmail} />
+        <Row label="Nature of Business" value={businessEntity.natureOfBusiness} />
+      </ReviewSection>
 
-        <ReviewSection title="Region & Area">
-          <ReviewRow label="Region" value={data.region || '—'} />
-          <ReviewRow label="Proposed Area" value={data.proposedArea ? `${data.proposedArea} hectares` : '—'} />
-        </ReviewSection>
+      {/* Step 3: Ownership & Personnel */}
+      <ReviewSection title="Ownership & Key Personnel" step={3} onEdit={setCurrentStep}>
+        <Row label="Shareholders" value={`${ownershipControl.shareholders.length} listed`} />
+        <Row label="Beneficial Owners (≥25%)" value={`${ownershipControl.ultimateBeneficialOwners.length} listed`} />
+        <Row label="Directors" value={`${ownershipControl.boardOfDirectors.length} listed`} />
+        <Row label="PEP Declaration" value={ownershipControl.pepDeclaration ? 'Yes — PEP identified' : 'No PEP'} />
+        <Row label="Key Personnel" value={`${keyPersonnel.length} of ${config?.requiredPersonnel.length ?? 0} roles filled`} />
+      </ReviewSection>
 
-        <ReviewSection title="Documents">
-          <p className="text-sm text-muted-foreground">
-            Documents uploaded in the previous step will be attached to this application.
-          </p>
-        </ReviewSection>
+      {/* Step 4: Site & Facility */}
+      <ReviewSection title="Site & Facility" step={4} onEdit={setCurrentStep}>
+        <Row label="Province" value={siteFacility.siteAddress.province} />
+        <Row label="District" value={siteFacility.siteAddress.district} />
+        <Row label="City" value={siteFacility.siteAddress.city} />
+        {siteFacility.siteAddress.gpsCoordinates && (
+          <Row label="GPS" value={`${siteFacility.siteAddress.gpsCoordinates.lat}, ${siteFacility.siteAddress.gpsCoordinates.lng}`} />
+        )}
+      </ReviewSection>
+
+      {/* Step 5: Type-Specific */}
+      <ReviewSection title="Licence-Specific Details" step={5} onEdit={setCurrentStep}>
+        {store.typeSpecificFields ? (
+          <p className="text-muted-foreground">Type-specific details have been provided.</p>
+        ) : (
+          <p className="text-amber-500 text-xs">No type-specific details entered yet.</p>
+        )}
+      </ReviewSection>
+
+      {/* Step 6: Documents */}
+      <ReviewSection title="Common Documents" step={6} onEdit={setCurrentStep}>
+        <Row label="Documents Uploaded" value={`${uploadedDocsCount} of 12`} />
+      </ReviewSection>
+
+      {/* Step 7: Fees */}
+      <ReviewSection title="Fee Calculation & Payment" step={7} onEdit={setCurrentStep}>
+        {feeBreakdown && (
+          <>
+            <Row label="Application Fee" value={formatCurrencyFull(feeBreakdown.applicationFee)} />
+            <Row label="Licence Fee" value={formatCurrencyFull(feeBreakdown.licenseFee)} />
+            <Row label="Security Clearance" value={formatCurrencyFull(feeBreakdown.securityClearanceFee)} />
+            <Row label="Track & Trace Setup" value={formatCurrencyFull(feeBreakdown.trackAndTraceSetup)} />
+            <div className="border-t border-white/10 pt-2 mt-2">
+              <Row label="Total Due Now" value={formatCurrencyFull(feeBreakdown.totalDueNow)} />
+            </div>
+            <Row label="Payment Method" value={paymentMethod ?? 'Not selected'} />
+          </>
+        )}
+      </ReviewSection>
+
+      {/* Certification */}
+      <div className="rounded-lg border-2 border-green-500/30 bg-green-500/5 p-4 space-y-3">
+        <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            id="certification"
+            checked={certificationAccepted}
+            onChange={(e) => setCertification(e.target.checked)}
+            className="mt-0.5 size-5 rounded border-white/20 accent-green-500"
+          />
+          <label htmlFor="certification" className="text-sm leading-relaxed">
+            I hereby certify that all information provided in this application is true, accurate, and complete to the best of my knowledge.
+            I understand that providing false or misleading information may result in the denial or revocation of my licence and may constitute
+            a criminal offence under the Cannabis Control and Regulatory Authority Act 2024.
+          </label>
+        </div>
       </div>
     </div>
   )

@@ -7,19 +7,10 @@ import { GlassCard } from '@/design-system/glass-card'
 import { Button } from '@/components/ui/button'
 import { formatDateShort, formatCurrencyFull } from '@/utils/format'
 import { cn } from '@/lib/utils'
+import { APPLICATION_STATUS_CONFIG } from '@/config/constants'
+import { getLicenseCategoryShortLabel, getTierLabel } from '@/utils/license-helpers'
 import { CheckSquare, Square, CheckCircle2, XCircle, Download, Clock } from 'lucide-react'
-import type { LicenseStatus } from '@/types/license'
-
-const statusBadge: Record<LicenseStatus, string> = {
-  active: 'badge-active',
-  pending: 'badge-pending',
-  suspended: 'badge-suspended',
-  revoked: 'badge-revoked',
-  expired: 'badge-revoked',
-  'under-review': 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-  approved: 'badge-active',
-  rejected: 'badge-revoked',
-}
+import type { ApplicationStatus } from '@/types/license'
 
 function getDaysUntilExpiry(expiryDate?: string): number | null {
   if (!expiryDate) return null
@@ -46,6 +37,23 @@ function ExpiryCountdown({ days }: { days: number | null }) {
     >
       <Clock className="h-2.5 w-2.5" />
       {days <= 0 ? 'Expired' : `${days}d left`}
+    </span>
+  )
+}
+
+function StatusBadge({ status }: { status: ApplicationStatus }) {
+  const config = APPLICATION_STATUS_CONFIG[status]
+  if (!config) return <span className="text-xs">{status}</span>
+  return (
+    <span
+      className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border"
+      style={{
+        backgroundColor: config.bgColor,
+        color: config.color,
+        borderColor: config.borderColor,
+      }}
+    >
+      {config.label}
     </span>
   )
 }
@@ -115,7 +123,8 @@ export function LicenseTable() {
                 </th>
                 <th className="px-4 py-3 text-left font-medium text-muted-foreground">License #</th>
                 <th className="px-4 py-3 text-left font-medium text-muted-foreground">Applicant / Company</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Type</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Tier</th>
                 <th className="px-4 py-3 text-left font-medium text-muted-foreground">Region</th>
                 <th className="px-4 py-3 text-right font-medium text-muted-foreground">Fee Paid</th>
                 <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
@@ -125,7 +134,7 @@ export function LicenseTable() {
             <tbody>
               {licenses.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
+                  <td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
                     No licenses found matching your criteria.
                   </td>
                 </tr>
@@ -153,21 +162,15 @@ export function LicenseTable() {
                         <div className="font-medium">{lic.applicantName}</div>
                         <div className="text-xs text-muted-foreground">{lic.companyName}</div>
                       </td>
-                      <td className="px-4 py-3">{lic.type}</td>
+                      <td className="px-4 py-3 text-xs">{getLicenseCategoryShortLabel(lic.category)}</td>
+                      <td className="px-4 py-3 text-xs">{getTierLabel(lic.category, lic.tier)}</td>
                       <td className="px-4 py-3">{lic.region}</td>
                       <td className="px-4 py-3 text-right font-mono text-xs">
                         {formatCurrencyFull(lic.feePaidPKR)}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span
-                            className={cn(
-                              'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize',
-                              statusBadge[lic.status] ?? 'badge-pending'
-                            )}
-                          >
-                            {lic.status.replace('-', ' ')}
-                          </span>
+                          <StatusBadge status={lic.status} />
                           <ExpiryCountdown days={daysLeft} />
                         </div>
                       </td>

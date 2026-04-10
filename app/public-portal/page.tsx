@@ -862,20 +862,48 @@ function OperatorsSection() {
 // SECTION 5: FEE SCHEDULE & REQUIREMENTS
 // ═══════════════════════════════════════════════════════════════
 function FeeScheduleSection() {
-  const [selectedFee, setSelectedFee] = useState<number | null>(null)
+  const [selectedFee, setSelectedFee] = useState<string | null>(null)
+
+  const feeCategories = Object.entries(FEE_SCHEDULE).map(([category, tiers]) => {
+    const firstTier = Object.values(tiers)[0]
+    const tierCount = Object.keys(tiers).length
+    return { category, tiers, firstTier, tierCount }
+  })
 
   const feeIcons: Record<string, React.ElementType> = {
-    'Cultivation': Leaf,
-    'Extraction': FlaskConical,
-    'Manufacturing': Factory,
-    'Sales & Distribution': Truck,
+    'CULTIVATION': Leaf,
+    'PROCESSING_EXTRACTION': FlaskConical,
+    'TESTING_LABORATORY': Factory,
+    'DISTRIBUTION_TRANSPORT': Truck,
+    'RETAIL_DISPENSARY': Factory,
+    'RESEARCH': Leaf,
+    'EXPORT_IMPORT': Truck,
+    'INDUSTRIAL_HEMP': Leaf,
+    'CANNABIS_DRUG': FlaskConical,
   }
 
   const feeColors: Record<string, string> = {
-    'Cultivation': 'from-green-600 to-green-700',
-    'Extraction': 'from-blue-600 to-blue-700',
-    'Manufacturing': 'from-purple-600 to-purple-700',
-    'Sales & Distribution': 'from-amber-600 to-amber-700',
+    'CULTIVATION': 'from-green-600 to-green-700',
+    'PROCESSING_EXTRACTION': 'from-blue-600 to-blue-700',
+    'TESTING_LABORATORY': 'from-purple-600 to-purple-700',
+    'DISTRIBUTION_TRANSPORT': 'from-amber-600 to-amber-700',
+    'RETAIL_DISPENSARY': 'from-teal-600 to-teal-700',
+    'RESEARCH': 'from-cyan-600 to-cyan-700',
+    'EXPORT_IMPORT': 'from-orange-600 to-orange-700',
+    'INDUSTRIAL_HEMP': 'from-lime-600 to-lime-700',
+    'CANNABIS_DRUG': 'from-rose-600 to-rose-700',
+  }
+
+  const categoryLabels: Record<string, string> = {
+    'CULTIVATION': 'Cultivation',
+    'PROCESSING_EXTRACTION': 'Processing & Extraction',
+    'TESTING_LABORATORY': 'Testing Laboratory',
+    'DISTRIBUTION_TRANSPORT': 'Distribution & Transport',
+    'RETAIL_DISPENSARY': 'Retail & Dispensary',
+    'RESEARCH': 'Research',
+    'EXPORT_IMPORT': 'Export / Import',
+    'INDUSTRIAL_HEMP': 'Industrial Hemp',
+    'CANNABIS_DRUG': 'Cannabis Drug',
   }
 
   const requiredDocs = [
@@ -897,30 +925,30 @@ function FeeScheduleSection() {
       </div>
 
       {/* Fee Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        {FEE_SCHEDULE.map((fee, idx) => {
-          const Icon = feeIcons[fee.type] || Leaf
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        {feeCategories.map(({ category, firstTier, tierCount }) => {
+          const Icon = feeIcons[category] || Leaf
+          const label = categoryLabels[category] || category
           return (
             <div
-              key={fee.type}
+              key={category}
               className="bg-white border border-green-200 rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all cursor-pointer"
-              onClick={() => setSelectedFee(selectedFee === idx ? null : idx)}
+              onClick={() => setSelectedFee(selectedFee === category ? null : category)}
             >
-              <div className={cn('p-5 text-white bg-gradient-to-br', feeColors[fee.type])}>
+              <div className={cn('p-5 text-white bg-gradient-to-br', feeColors[category] || 'from-green-600 to-green-700')}>
                 <Icon className="h-8 w-8 mb-3 opacity-90" />
-                <h3 className="text-lg font-bold">{fee.type}</h3>
-                <p className="text-xs opacity-80 mt-1">License Category</p>
+                <h3 className="text-lg font-bold">{label}</h3>
+                <p className="text-xs opacity-80 mt-1">{tierCount} tier{tierCount > 1 ? 's' : ''} available</p>
               </div>
               <div className="p-5 space-y-3">
-                <FeeRow label="Application Fee" value={formatPKR(fee.application)} />
-                <FeeRow label="Annual Fee" value={formatPKR(fee.annual)} />
-                <FeeRow label="Renewal Fee" value={formatPKR(fee.renewal)} />
-                <FeeRow label="Inspection Fee" value={formatPKR(fee.inspection)} />
+                <FeeRow label="Application Fee (from)" value={formatPKR(firstTier.applicationFee)} />
+                <FeeRow label="License Fee (from)" value={formatPKR(firstTier.licenseFee)} />
+                <FeeRow label="Annual Renewal (from)" value={formatPKR(firstTier.annualRenewal)} />
                 <div className="pt-2 border-t border-gray-100">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-400">Total First Year</span>
+                    <span className="text-xs text-gray-400">First Year (from)</span>
                     <span className="text-sm font-bold text-green-800">
-                      {formatPKR(fee.application + fee.annual + fee.inspection)}
+                      {formatPKR(firstTier.totalFirstYear)}
                     </span>
                   </div>
                 </div>
@@ -934,18 +962,21 @@ function FeeScheduleSection() {
       <DetailModal
         open={selectedFee !== null}
         onClose={() => setSelectedFee(null)}
-        title={selectedFee !== null ? `${FEE_SCHEDULE[selectedFee].type} License — Fee Breakdown` : ''}
+        title={selectedFee !== null ? `${categoryLabels[selectedFee] || selectedFee} License — Fee Breakdown` : ''}
       >
         {selectedFee !== null && (() => {
-          const fee = FEE_SCHEDULE[selectedFee]
+          const tiers = FEE_SCHEDULE[selectedFee as keyof typeof FEE_SCHEDULE]
           return (
             <div className="space-y-4">
-              <div className="space-y-2">
-                <InfoRow label="Application Fee (one-time)" value={formatPKR(fee.application)} />
-                <InfoRow label="Annual License Fee" value={formatPKR(fee.annual)} />
-                <InfoRow label="Renewal Fee" value={formatPKR(fee.renewal)} />
-                <InfoRow label="Inspection Fee (per visit)" value={formatPKR(fee.inspection)} />
-              </div>
+              {Object.entries(tiers).map(([tierKey, fee]) => (
+                <div key={tierKey} className="space-y-2 border-b border-gray-100 pb-3 last:border-0">
+                  <p className="font-semibold text-green-800 text-sm">{tierKey.replace(/_/g, ' ')}</p>
+                  <InfoRow label="Application Fee (one-time)" value={formatPKR(fee.applicationFee)} />
+                  <InfoRow label="License Fee" value={formatPKR(fee.licenseFee)} />
+                  <InfoRow label="Annual Renewal" value={formatPKR(fee.annualRenewal)} />
+                  <InfoRow label="First Year Total" value={formatPKR(fee.totalFirstYear)} />
+                </div>
+              ))}
               <div className="bg-green-50 rounded-lg p-4 text-sm text-green-800 space-y-1">
                 <p className="font-semibold">Payment Information:</p>
                 <p>All fees are payable in Pakistani Rupees (PKR) via bank draft or online transfer to the CCRA designated account at the State Bank of Pakistan.</p>
