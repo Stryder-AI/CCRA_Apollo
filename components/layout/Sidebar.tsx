@@ -67,10 +67,10 @@ export function Sidebar() {
       {/* Branding Footer */}
       {!collapsed && (
         <div className="px-5 pb-2">
-          <p className="text-[10px] text-muted-foreground/70 leading-tight">
+          <p className="text-[10px] font-semibold leading-tight bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent drop-shadow-[0_0_6px_rgba(34,197,94,0.4)]">
             Product by TechGIS
           </p>
-          <p className="text-[10px] font-medium leading-tight mt-0.5 bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
+          <p className="text-[10px] text-muted-foreground/70 leading-tight mt-0.5">
             Powered by {POWERED_BY}
           </p>
         </div>
