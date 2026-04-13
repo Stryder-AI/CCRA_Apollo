@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { GlassCard } from '@/design-system/glass-card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Check, ChevronLeft, ChevronRight, CheckCircle2, Save, Sparkles, ArrowRight, Copy } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight, CheckCircle2, Save, Sparkles, ArrowRight, Copy, Printer, Download } from 'lucide-react'
 import { toast } from 'sonner'
 import { useApplicationWizardStore } from '@/store/useApplicationWizardStore'
 import { generateApplicationReference } from '@/utils/license-helpers'
@@ -91,7 +91,7 @@ export function PublicWizardShell({ onSubmit }: PublicWizardShellProps) {
   if (submitted) {
     return (
       <GlassCard className="w-full" padding="lg">
-        <div className="flex flex-col items-center gap-6 py-12">
+        <div id="print-receipt" className="flex flex-col items-center gap-6 py-12">
           {/* Animated checkmark */}
           <div className="relative flex items-center justify-center">
             <svg
@@ -170,6 +170,42 @@ export function PublicWizardShell({ onSubmit }: PublicWizardShellProps) {
               Go to Public Portal
               <ArrowRight className="h-4 w-4" />
             </a>
+            <button
+              onClick={() => window.print()}
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
+            >
+              <Printer className="h-4 w-4" /> Print Receipt
+            </button>
+            <button
+              onClick={() => {
+                const receiptText = [
+                  'CANNABIS CONTROL & REGULATORY AUTHORITY',
+                  '========================================',
+                  'APPLICATION RECEIPT',
+                  '',
+                  `Reference Number: ${refNumber}`,
+                  `Date: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`,
+                  '',
+                  'Status: SUBMITTED',
+                  '',
+                  'Your application has been received and will be',
+                  'screened within 5 business days.',
+                  '',
+                  'Please keep this reference number for your records.',
+                  '========================================',
+                ].join('\n')
+                const blob = new Blob([receiptText], { type: 'text/plain' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `CCRA-Receipt-${refNumber}.txt`
+                a.click()
+                URL.revokeObjectURL(url)
+              }}
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
+            >
+              <Download className="h-4 w-4" /> Download Receipt
+            </button>
           </div>
         </div>
 
@@ -180,6 +216,36 @@ export function PublicWizardShell({ onSubmit }: PublicWizardShellProps) {
           @keyframes scale-in {
             from { transform: scale(0); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
+          }
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            #print-receipt, #print-receipt * {
+              visibility: visible;
+            }
+            #print-receipt {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+              background: white;
+              color: black;
+              padding: 2rem;
+            }
+            #print-receipt svg circle,
+            #print-receipt svg path {
+              animation: none !important;
+              stroke-dashoffset: 0 !important;
+            }
+            #print-receipt button,
+            #print-receipt a {
+              display: none !important;
+            }
+            nav, aside, header, footer,
+            [data-sidebar], [data-topbar] {
+              display: none !important;
+            }
           }
         ` }} />
       </GlassCard>

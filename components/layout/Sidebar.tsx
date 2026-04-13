@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store/useAppStore'
 import { NAV_ITEMS } from '@/config/navigation'
-import { APP_NAME, ORGANIZATION_SHORT } from '@/config/constants'
+import { APP_NAME, ORGANIZATION_SHORT, POWERED_BY } from '@/config/constants'
 import { ChevronLeft, Leaf } from 'lucide-react'
 
 export function Sidebar() {
@@ -60,6 +60,18 @@ export function Sidebar() {
           )
         })}
       </nav>
+
+      {/* Branding Footer */}
+      {!collapsed && (
+        <div className="px-5 pb-2">
+          <p className="text-[10px] text-muted-foreground/70 leading-tight">
+            Product by TechGIS
+          </p>
+          <p className="text-[10px] font-medium leading-tight mt-0.5 bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
+            Powered by {POWERED_BY}
+          </p>
+        </div>
+      )}
 
       {/* Collapse Toggle */}
       <div className="px-3 py-4 border-t border-[var(--glass-border-subtle)]">

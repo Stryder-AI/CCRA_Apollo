@@ -13,7 +13,10 @@ import {
 } from 'lucide-react'
 import { farms } from '@/data/mock-farms'
 import { batches } from '@/data/mock-traceability'
-import { FEE_SCHEDULE, REGIONS } from '@/config/constants'
+import { FEE_SCHEDULE, REGIONS, APPLICATION_STATUS_CONFIG } from '@/config/constants'
+import { useLicenseStore } from '@/store/useLicenseStore'
+import { getLicenseCategoryLabel, getStatusLabel } from '@/utils/license-helpers'
+import type { ApplicationStatus } from '@/types/license'
 
 // ─── TYPES ───
 type TabKey = 'home' | 'track' | 'verify' | 'operators' | 'fees' | 'leaderboard' | 'faq'
@@ -281,12 +284,89 @@ function QuickAccessCard({ icon: Icon, title, description, color, iconColor }: {
 // ═══════════════════════════════════════════════════════════════
 // SECTION 2: APPLICATION STATUS TRACKER
 // ═══════════════════════════════════════════════════════════════
+function generateTimelineSteps(status: ApplicationStatus, submissionDate?: string): ApplicationStep[] {
+  const dateStr = submissionDate
+    ? new Date(submissionDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    : 'N/A'
+
+  const allSteps: { title: string; details: string }[] = [
+    { title: 'Application Submitted', details: 'Application form, supporting documents, and fees received and logged into the CCRA system.' },
+    { title: 'Documents Verified', details: 'All submitted documents verified for completeness and authenticity.' },
+    { title: 'Screening Review', details: 'Initial screening review of application eligibility and completeness.' },
+    { title: 'Technical Review', details: 'Detailed technical assessment of the application by the licensing team.' },
+    { title: 'Security Clearance', details: 'Background checks and security clearance processing for all key personnel.' },
+    { title: 'Inspection Scheduled', details: 'Physical site inspection scheduled and coordination underway.' },
+    { title: 'Inspection Complete', details: 'Site inspection completed. Findings being compiled for final review.' },
+    { title: 'Final Decision', details: 'Application forwarded for final decision by the Director General.' },
+  ]
+
+  // Map status to how many steps are complete and which is current
+  const statusProgressMap: Record<string, { completed: number; denied?: boolean; rfiNote?: boolean }> = {
+    SUBMITTED: { completed: 1 },
+    UNDER_REVIEW_SCREENING: { completed: 2 },
+    RFI_ISSUED: { completed: 2, rfiNote: true },
+    UNDER_REVIEW_TECHNICAL: { completed: 3 },
+    SECURITY_CLEARANCE_PENDING: { completed: 4 },
+    INSPECTION_SCHEDULED: { completed: 5 },
+    INSPECTION_COMPLETE: { completed: 6 },
+    APPROVED: { completed: 8 },
+    APPROVED_WITH_CONDITIONS: { completed: 8 },
+    DENIED: { completed: 2, denied: true },
+    LAPSED: { completed: 1 },
+    SUSPENDED: { completed: 8 },
+    REVOKED: { completed: 8 },
+    EXPIRED: { completed: 8 },
+    RENEWAL_IN_PROGRESS: { completed: 8 },
+    DRAFT: { completed: 0 },
+  }
+
+  const progress = statusProgressMap[status] ?? { completed: 0 }
+  const completedCount = progress.completed
+
+  return allSteps.map((step, idx) => {
+    const stepNum = idx + 1
+    let stepStatus: 'completed' | 'current' | 'pending'
+    let stepDate = 'Pending'
+
+    if (progress.denied && stepNum > completedCount) {
+      stepStatus = 'pending'
+    } else if (stepNum < completedCount) {
+      stepStatus = 'completed'
+      stepDate = stepNum === 1 ? dateStr : ''
+    } else if (stepNum === completedCount) {
+      stepStatus = completedCount === allSteps.length ? 'completed' : 'completed'
+      stepDate = stepNum === 1 ? dateStr : ''
+    } else if (stepNum === completedCount + 1 && !progress.denied) {
+      stepStatus = 'current'
+      stepDate = 'In Progress'
+    } else {
+      stepStatus = 'pending'
+    }
+
+    // If all steps are complete (APPROVED etc.), mark everything completed
+    if (completedCount >= allSteps.length) {
+      stepStatus = 'completed'
+      stepDate = stepNum === 1 ? dateStr : ''
+    }
+
+    const notes = progress.rfiNote && stepNum === completedCount + 1
+      ? 'A Request for Information (RFI) has been issued. Please check your email and respond promptly.'
+      : undefined
+
+    return { ...step, date: stepDate, status: stepStatus, notes }
+  })
+}
+
 function TrackApplicationSection() {
   const [refNumber, setRefNumber] = useState('CCRA-REG-2026-0042')
   const [tracked, setTracked] = useState(false)
   const [expandedStep, setExpandedStep] = useState<number | null>(null)
+  const [notFound, setNotFound] = useState(false)
 
-  const steps: ApplicationStep[] = [
+  const licenses = useLicenseStore((s) => s.licenses)
+
+  // Hardcoded demo fallback for the default reference
+  const hardcodedSteps: ApplicationStep[] = [
     {
       title: 'Application Submitted',
       date: 'March 1, 2026',
@@ -329,6 +409,43 @@ function TrackApplicationSection() {
     },
   ]
 
+  // Look up application from the license store
+  const matchedLicense = licenses.find(
+    (l) => l.applicationId === refNumber || l.licenseNumber === refNumber
+  )
+
+  const isHardcodedDemo = refNumber.trim() === 'CCRA-REG-2026-0042'
+
+  // Decide which data to show
+  const useHardcoded = isHardcodedDemo && !matchedLicense
+  const applicationFound = useHardcoded || !!matchedLicense
+
+  const steps: ApplicationStep[] = useHardcoded
+    ? hardcodedSteps
+    : matchedLicense
+      ? generateTimelineSteps(matchedLicense.status, matchedLicense.applicationDate)
+      : []
+
+  const applicationTypeLabel = useHardcoded
+    ? 'Cultivation License'
+    : matchedLicense
+      ? getLicenseCategoryLabel(matchedLicense.category)
+      : ''
+
+  const applicationStatusLabel = matchedLicense
+    ? getStatusLabel(matchedLicense.status)
+    : useHardcoded
+      ? 'Under Review'
+      : ''
+
+  const applicantNameLabel = matchedLicense?.applicantName ?? (useHardcoded ? '' : '')
+
+  const handleTrack = () => {
+    setTracked(true)
+    setNotFound(!applicationFound && refNumber.trim() !== '')
+    setExpandedStep(null)
+  }
+
   return (
     <div className="animate-in fade-in duration-500 max-w-4xl mx-auto">
       <div className="text-center mb-8">
@@ -353,7 +470,7 @@ function TrackApplicationSection() {
             />
           </div>
           <button
-            onClick={() => setTracked(true)}
+            onClick={handleTrack}
             className="px-8 py-3 bg-green-700 hover:bg-green-800 text-white font-medium rounded-lg transition-colors shadow-md flex items-center gap-2"
           >
             <Search className="h-4 w-4" /> Track
@@ -362,18 +479,49 @@ function TrackApplicationSection() {
       </div>
 
       {/* Results */}
-      {tracked && (
+      {tracked && notFound && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+            <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-3" />
+            <h3 className="text-lg font-bold text-red-900 mb-1">No Application Found</h3>
+            <p className="text-sm text-red-700">
+              No application matching reference <span className="font-mono font-semibold">{refNumber}</span> was found.
+              Please double-check the reference number and try again.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {tracked && applicationFound && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           {/* Application Header */}
-          <div className="bg-green-50 border border-green-200 rounded-xl p-5 mb-6 flex items-center justify-between">
-            <div>
-              <p className="text-sm text-green-600 font-medium">Application Reference</p>
-              <p className="text-lg font-bold font-mono text-green-900">{refNumber}</p>
+          <div className="bg-green-50 border border-green-200 rounded-xl p-5 mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm text-green-600 font-medium">Application Reference</p>
+                <p className="text-lg font-bold font-mono text-green-900">{refNumber}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-green-600 font-medium">Application Type</p>
+                <p className="text-lg font-bold text-green-900">{applicationTypeLabel}</p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-green-600 font-medium">Application Type</p>
-              <p className="text-lg font-bold text-green-900">Cultivation License</p>
-            </div>
+            {(applicantNameLabel || applicationStatusLabel) && (
+              <div className="flex items-center justify-between border-t border-green-200 pt-3">
+                {applicantNameLabel && (
+                  <div>
+                    <p className="text-sm text-green-600 font-medium">Applicant</p>
+                    <p className="text-base font-semibold text-green-900">{applicantNameLabel}</p>
+                  </div>
+                )}
+                {applicationStatusLabel && (
+                  <div className="text-right">
+                    <p className="text-sm text-green-600 font-medium">Status</p>
+                    <p className="text-base font-semibold text-green-900">{applicationStatusLabel}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Timeline */}

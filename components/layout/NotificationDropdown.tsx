@@ -7,6 +7,8 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useLicenseStore } from '@/store/useLicenseStore'
+import { getLicenseCategoryLabel } from '@/utils/license-helpers'
 
 interface Notification {
   id: string
@@ -49,7 +51,7 @@ const initialNotifications: Notification[] = [
   {
     id: 'n004',
     type: 'warning',
-    title: '[STRYDER AI] Anomaly Alert',
+    title: '[STRYDE] Anomaly Alert',
     message: 'Unusual water consumption spike detected at Tirah Valley Estate — 34% above baseline.',
     timestamp: '2026-03-16T14:00:00Z',
     timeAgo: '20h ago',
@@ -94,7 +96,7 @@ const initialNotifications: Notification[] = [
   {
     id: 'n009',
     type: 'warning',
-    title: '[STRYDER AI] Compliance Prediction',
+    title: '[STRYDE] Compliance Prediction',
     message: '3 farms predicted to miss next compliance deadline based on historical reporting patterns.',
     timestamp: '2026-03-14T10:00:00Z',
     timeAgo: '3d ago',
@@ -131,9 +133,29 @@ function NotificationIcon({ type }: { type: Notification['type'] }) {
 }
 
 export function NotificationDropdown() {
+  const licenses = useLicenseStore((s) => s.licenses)
+
+  // Generate dynamic notifications for newly submitted applications
+  const submittedNotifications: Notification[] = licenses
+    .filter((l) => l.status === 'SUBMITTED')
+    .map((license, idx) => ({
+      id: `dynamic-submitted-${license.id}`,
+      type: 'info' as const,
+      title: 'New Application Received',
+      message: `${license.applicantName} submitted a ${getLicenseCategoryLabel(license.category)} application`,
+      timestamp: license.applicationDate || new Date().toISOString(),
+      timeAgo: license.applicationDate
+        ? `${Math.max(1, Math.floor((Date.now() - new Date(license.applicationDate).getTime()) / (1000 * 60 * 60 * 24)))}d ago`
+        : 'Just now',
+      read: false,
+    }))
+
   const [notifications, setNotifications] = useState(initialNotifications)
 
-  const unreadCount = notifications.filter((n) => !n.read).length
+  // Merge dynamic notifications with static ones (dynamic first)
+  const allNotifications = [...submittedNotifications, ...notifications]
+
+  const unreadCount = allNotifications.filter((n) => !n.read).length
 
   const markAllAsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
@@ -184,7 +206,7 @@ export function NotificationDropdown() {
 
         {/* Notification List */}
         <div className="max-h-[400px] overflow-y-auto">
-          {notifications.map((notification) => (
+          {allNotifications.map((notification) => (
             <button
               key={notification.id}
               onClick={() => markAsRead(notification.id)}

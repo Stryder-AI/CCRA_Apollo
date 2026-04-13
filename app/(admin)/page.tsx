@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { PageTransition } from '@/design-system/page-transition'
 import { StatCard } from '@/components/dashboard/StatCard'
 import { AuthorityCard } from '@/components/dashboard/AuthorityCard'
@@ -12,11 +13,28 @@ import { ActivityFeed } from '@/components/dashboard/ActivityFeed'
 import { AlertsPanel } from '@/components/dashboard/AlertsPanel'
 import { AiDashboardSummary } from '@/components/dashboard/AiDashboardSummary'
 import { BoardReportGenerator } from '@/components/dashboard/BoardReportGenerator'
-import { dashboardStats } from '@/data/mock-stats'
+import { dashboardStats as mockStats } from '@/data/mock-stats'
+import { useLicenseStore } from '@/store/useLicenseStore'
 import { formatCurrency, formatPercent } from '@/utils/format'
 import { Sprout, FileCheck, Banknote, ShieldCheck } from 'lucide-react'
 
 export default function DashboardPage() {
+  const licenses = useLicenseStore((s) => s.licenses)
+
+  const dashboardStats = useMemo(() => {
+    const totalFarms = licenses.filter((l) =>
+      ['CULTIVATION', 'INDUSTRIAL_HEMP'].includes(l.category)
+    ).length
+    const activeLicenses = licenses.filter((l) =>
+      ['APPROVED', 'APPROVED_WITH_CONDITIONS'].includes(l.status)
+    ).length
+
+    return {
+      ...mockStats,
+      totalFarms,
+      activeLicenses,
+    }
+  }, [licenses])
   return (
     <PageTransition>
       {/* AI Briefing + Report Generator */}

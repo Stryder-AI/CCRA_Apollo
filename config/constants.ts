@@ -5,6 +5,7 @@ export const APP_VERSION = '0.2.0'
 export const ORGANIZATION = 'Cannabis Control & Regulatory Authority'
 export const ORGANIZATION_SHORT = 'CCRA'
 export const BUILT_BY = 'TechGIS — Technology & GIS Solutions'
+export const POWERED_BY = 'STRYDE'
 
 export const MAP_CENTER: [number, number] = [30.3753, 69.3451]
 export const MAP_ZOOM = 6
