@@ -178,7 +178,7 @@ function HeroSection() {
           {/* Apply for License CTA */}
           <div className="mt-8">
             <Link
-              href="/licensing/apply"
+              href="/register"
               className="inline-flex items-center gap-3 bg-white text-green-800 font-bold text-lg px-10 py-4 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 group"
             >
               <PenLine className="h-6 w-6" />
@@ -203,7 +203,7 @@ function HeroSection() {
             </div>
           </div>
           <Link
-            href="/licensing/apply"
+            href="/register"
             className="flex-shrink-0 inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 group"
           >
             Start Application
@@ -222,7 +222,7 @@ function HeroSection() {
 
       {/* Quick Access Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Link href="/licensing/apply" className="block group">
+        <Link href="/register" className="block group">
           <div className={cn(
             'relative overflow-hidden rounded-xl border-2 border-green-500 bg-green-50 p-6 shadow-md',
             'hover:shadow-xl transition-all duration-300 hover:border-green-600 h-full'

@@ -1,6 +1,7 @@
 'use client'
 
-import { Leaf } from 'lucide-react'
+import Link from 'next/link'
+import { Leaf, ArrowLeft } from 'lucide-react'
 
 export default function RegisterLayout({
   children,
@@ -21,7 +22,7 @@ export default function RegisterLayout({
                 Cannabis Control &amp; Regulatory Authority
               </h1>
               <p className="text-sm text-muted-foreground">
-                Farm Registration Portal
+                Public License Application Portal
               </p>
             </div>
           </div>
@@ -29,8 +30,16 @@ export default function RegisterLayout({
         </div>
       </header>
 
+      {/* Back to Portal */}
+      <div className="mx-auto max-w-5xl px-6 pt-4">
+        <Link href="/public-portal" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Public Portal
+        </Link>
+      </div>
+
       {/* Main Content */}
-      <main className="flex-1 w-full mx-auto max-w-4xl px-6 py-8 flex items-start justify-center">
+      <main className="flex-1 w-full mx-auto max-w-5xl px-6 py-6 flex items-start justify-center">
         {children}
       </main>
 
