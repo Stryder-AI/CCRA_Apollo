@@ -25,32 +25,25 @@ export default function DashboardPage() {
   const user = useAuthStore((s) => s.user)
 
   const [isLoading, setIsLoading] = useState(true)
+  const [timeOfDay, setTimeOfDay] = useState('')
+  const [formattedDate, setFormattedDate] = useState('')
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 600)
     return () => clearTimeout(timer)
   }, [])
 
-  const { timeOfDay, formattedDate } = useMemo(() => {
+  useEffect(() => {
     const now = new Date()
     const hour = now.getHours()
-    const timeOfDay = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening'
-    const formattedDate = now.toLocaleDateString('en-GB', {
+    setTimeOfDay(hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening')
+    setFormattedDate(now.toLocaleDateString('en-GB', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
       year: 'numeric',
-    })
-    return { timeOfDay, formattedDate }
+    }))
   }, [])
-
-  if (isLoading) {
-    return (
-      <PageTransition>
-        <SkeletonDashboard />
-      </PageTransition>
-    )
-  }
 
   const dashboardStats = useMemo(() => {
     const totalFarms = licenses.filter((l) =>
@@ -66,6 +59,15 @@ export default function DashboardPage() {
       activeLicenses,
     }
   }, [licenses])
+
+  if (isLoading) {
+    return (
+      <PageTransition>
+        <SkeletonDashboard />
+      </PageTransition>
+    )
+  }
+
   return (
     <PageTransition>
       {/* Welcome */}

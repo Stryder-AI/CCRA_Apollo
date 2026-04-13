@@ -26,25 +26,30 @@ export function TopBar() {
   const user = useAuthStore((s) => s.user)
   const collapsed = useAppStore((s) => s.sidebarCollapsed)
 
-  const [currentTime, setCurrentTime] = useState(new Date())
+  const [currentTime, setCurrentTime] = useState<Date | null>(null)
 
   useEffect(() => {
+    setCurrentTime(new Date())
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
 
-  const formattedTime = currentTime.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  })
+  const formattedTime = currentTime
+    ? currentTime.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      })
+    : ''
 
-  const formattedDate = currentTime.toLocaleDateString('en-US', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
+  const formattedDate = currentTime
+    ? currentTime.toLocaleDateString('en-US', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : ''
 
   const initials = user.name
     .split(' ')
@@ -74,13 +79,15 @@ export function TopBar() {
       </div>
 
       {/* Live Clock */}
-      <div className="hidden lg:flex items-center gap-2 px-4 py-1.5 rounded-xl bg-accent/50 border border-[var(--glass-border-subtle)]">
-        <Clock className="w-3.5 h-3.5 text-ccra-green" />
-        <div className="text-right">
-          <p className="text-xs font-mono font-semibold leading-none">{formattedTime}</p>
-          <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">{formattedDate}</p>
+      {currentTime && (
+        <div className="hidden lg:flex items-center gap-2 px-4 py-1.5 rounded-xl bg-accent/50 border border-[var(--glass-border-subtle)]">
+          <Clock className="w-3.5 h-3.5 text-ccra-green" />
+          <div className="text-right">
+            <p className="text-xs font-mono font-semibold leading-none">{formattedTime}</p>
+            <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">{formattedDate}</p>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex items-center gap-2">
         {/* Theme Toggle */}
