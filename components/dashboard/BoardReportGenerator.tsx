@@ -65,7 +65,7 @@ export function BoardReportGenerator() {
 
           <div className="space-y-4 mt-2">
             {/* Report Preview */}
-            <div className="rounded-xl border border-border bg-white dark:bg-zinc-900 p-6 space-y-6">
+            <div className="glass rounded-xl p-6 space-y-6">
               {/* Header */}
               <div className="text-center border-b border-border pb-4">
                 <p className="text-[10px] tracking-[0.2em] text-muted-foreground uppercase">

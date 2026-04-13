@@ -65,23 +65,23 @@
 
 :root {
   /* Core Colors */
-  --background: #f5f7fa;
+  --background: transparent;
   --foreground: #111827;
-  --card: #ffffff;
+  --card: rgba(255, 255, 255, 0.45);
   --card-foreground: #111827;
-  --popover: #ffffff;
+  --popover: rgba(255, 255, 255, 0.85);
   --popover-foreground: #111827;
   --primary: #22c55e;
   --primary-foreground: #ffffff;
-  --secondary: #f0f1f3;
+  --secondary: rgba(240, 241, 243, 0.5);
   --secondary-foreground: #111827;
-  --muted: #f0f1f3;
+  --muted: rgba(240, 241, 243, 0.4);
   --muted-foreground: #6b7280;
-  --accent: #f0fdf4;
+  --accent: rgba(240, 253, 244, 0.5);
   --accent-foreground: #111827;
   --destructive: #ef4444;
-  --border: #e5e7eb;
-  --input: #e5e7eb;
+  --border: rgba(0, 0, 0, 0.08);
+  --input: rgba(0, 0, 0, 0.08);
   --ring: #22c55e;
   --radius: 0.75rem;
 
@@ -93,26 +93,26 @@
   --chart-5: #8b5cf6;
 
   /* Sidebar */
-  --sidebar: rgba(255, 255, 255, 0.88);
+  --sidebar: rgba(255, 255, 255, 0.55);
   --sidebar-foreground: #111827;
   --sidebar-primary: #22c55e;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f0fdf4;
+  --sidebar-accent: rgba(240, 253, 244, 0.6);
   --sidebar-accent-foreground: #111827;
   --sidebar-border: rgba(0, 0, 0, 0.06);
   --sidebar-ring: #22c55e;
 
   /* Glassmorphism Tokens */
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-bg-heavy: rgba(255, 255, 255, 0.88);
-  --glass-bg-light: rgba(255, 255, 255, 0.5);
-  --glass-border: rgba(255, 255, 255, 0.35);
-  --glass-border-subtle: rgba(0, 0, 0, 0.06);
-  --glass-blur: 20px;
+  --glass-bg: rgba(255, 255, 255, 0.35);
+  --glass-bg-heavy: rgba(255, 255, 255, 0.55);
+  --glass-bg-light: rgba(255, 255, 255, 0.2);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-border-subtle: rgba(255, 255, 255, 0.3);
+  --glass-blur: 24px;
   --glass-blur-heavy: 40px;
-  --glass-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.03);
-  --glass-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.08);
-  --glass-shadow-elevated: 0 12px 40px rgba(0, 0, 0, 0.1);
+  --glass-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --glass-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.3);
+  --glass-shadow-elevated: 0 16px 48px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.2);
 
   /* Glow Tokens */
   --glow-green: 0 0 20px rgba(34, 197, 94, 0.15);
