@@ -74,9 +74,8 @@ export default function DashboardPage() {
       <div className="mb-6 animate-slide-up">
         <div className="flex items-center gap-3 mb-1">
           <h1 className="text-2xl font-bold tracking-tight">
-            Good {timeOfDay}, {user.name.split(' ')[0]}
+            Good {timeOfDay}
           </h1>
-          <span className="text-2xl animate-[wave_2s_ease-in-out_infinite]">👋</span>
         </div>
         <p className="text-sm text-muted-foreground">
           {formattedDate} — Here&apos;s your intelligence briefing for today.
