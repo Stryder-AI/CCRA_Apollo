@@ -63,7 +63,7 @@ export function StepReview() {
   const {
     category, tier, businessEntity, ownershipControl, keyPersonnel,
     siteFacility, commonDocuments, feeBreakdown, paymentMethod,
-    certificationAccepted, setCertification, setCurrentStep,
+    certificationAccepted, setCertification, setCurrentStep, validationErrors,
   } = store
 
   const config = category ? LICENSE_TYPE_CONFIGS[category] : null
@@ -149,7 +149,7 @@ export function StepReview() {
       </ReviewSection>
 
       {/* Certification */}
-      <div className="rounded-lg border-2 border-green-500/30 bg-green-500/5 p-4 space-y-3">
+      <div className={cn("rounded-lg border-2 p-4 space-y-3", validationErrors.includes('certification') ? 'border-red-500/50 bg-red-500/5' : 'border-green-500/30 bg-green-500/5')}>
         <div className="flex items-start gap-3">
           <input
             type="checkbox"

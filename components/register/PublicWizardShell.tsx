@@ -1,11 +1,14 @@
 'use client'
 
+import { useState } from 'react'
 import { GlassCard } from '@/design-system/glass-card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Check, ChevronLeft, ChevronRight, CheckCircle2, Save, Sparkles } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight, CheckCircle2, Save, Sparkles, ArrowRight, Copy } from 'lucide-react'
 import { toast } from 'sonner'
 import { useApplicationWizardStore } from '@/store/useApplicationWizardStore'
+import { generateApplicationReference } from '@/utils/license-helpers'
+import { getStepErrors, FIELD_ERROR_LABELS } from '@/utils/wizard-validation'
 
 import { StepLicenseType } from '@/components/licensing/wizard/StepLicenseType'
 import { StepBusinessEntity } from '@/components/licensing/wizard/StepBusinessEntity'
@@ -29,58 +32,25 @@ const STEPS = [
 
 const TOTAL_STEPS = STEPS.length
 
-function validateStep(step: number, state: ReturnType<typeof useApplicationWizardStore.getState>): string | null {
-  switch (step) {
-    case 1:
-      if (!state.category) return 'Please select a license category'
-      if (!state.tier) return 'Please select a license tier'
-      return null
-    case 2:
-      if (!state.businessEntity.legalEntityName.trim()) return 'Legal entity name is required'
-      if (!state.businessEntity.secpRegistrationNumber.trim()) return 'SECP registration number is required'
-      if (!state.businessEntity.ntn.trim()) return 'NTN is required'
-      if (!state.businessEntity.businessPhone.trim()) return 'Business phone is required'
-      if (!state.businessEntity.businessEmail.trim()) return 'Business email is required'
-      if (!state.businessEntity.registeredAddress.province) return 'Province is required for registered address'
-      return null
-    case 3:
-      if (state.ownershipControl.shareholders.length === 0) return 'At least one shareholder is required'
-      if (state.ownershipControl.shareholders.some(s => !s.name.trim())) return 'All shareholder names are required'
-      return null
-    case 4:
-      if (!state.siteFacility.siteAddress.province) return 'Site province is required'
-      if (!state.siteFacility.siteAddress.district) return 'Site district is required'
-      return null
-    case 5:
-      if (!state.typeSpecificFields) return 'Please fill in the type-specific details'
-      return null
-    case 6:
-      return null
-    case 7:
-      if (!state.paymentMethod) return 'Please select a payment method'
-      return null
-    case 8:
-      if (!state.certificationAccepted) return 'You must accept the certification to submit'
-      return null
-    default:
-      return null
-  }
-}
-
 interface PublicWizardShellProps {
   onSubmit: () => void
 }
 
 export function PublicWizardShell({ onSubmit }: PublicWizardShellProps) {
   const store = useApplicationWizardStore()
-  const { currentStep, setCurrentStep } = store
+  const { currentStep, setCurrentStep, setValidationErrors } = store
+  const [submitted, setSubmitted] = useState(false)
+  const [refNumber, setRefNumber] = useState('')
 
   const progressPercent = Math.round(((currentStep - 1) / (TOTAL_STEPS - 1)) * 100)
 
   const handleNext = () => {
-    const error = validateStep(currentStep, useApplicationWizardStore.getState())
-    if (error) {
-      toast.error('Validation Error', { description: error })
+    const state = useApplicationWizardStore.getState()
+    const errors = getStepErrors(currentStep, state)
+    if (errors.length > 0) {
+      setValidationErrors(errors)
+      const labels = errors.map(e => FIELD_ERROR_LABELS[e] || e).join(', ')
+      toast.error('Required fields missing', { description: labels })
       return
     }
     setCurrentStep(Math.min(currentStep + 1, TOTAL_STEPS))
@@ -97,11 +67,17 @@ export function PublicWizardShell({ onSubmit }: PublicWizardShellProps) {
   }
 
   const handleFinalSubmit = () => {
-    const error = validateStep(currentStep, useApplicationWizardStore.getState())
-    if (error) {
-      toast.error('Validation Error', { description: error })
+    const state = useApplicationWizardStore.getState()
+    const errors = getStepErrors(currentStep, state)
+    if (errors.length > 0) {
+      setValidationErrors(errors)
+      const labels = errors.map(e => FIELD_ERROR_LABELS[e] || e).join(', ')
+      toast.error('Required fields missing', { description: labels })
       return
     }
+    const ref = generateApplicationReference()
+    setRefNumber(ref)
+    setSubmitted(true)
     onSubmit()
   }
 
@@ -111,6 +87,106 @@ export function PublicWizardShell({ onSubmit }: PublicWizardShellProps) {
     }
   }
 
+  // ── Confirmation Screen ──
+  if (submitted) {
+    return (
+      <GlassCard className="w-full" padding="lg">
+        <div className="flex flex-col items-center gap-6 py-12">
+          {/* Animated checkmark */}
+          <div className="relative flex items-center justify-center">
+            <svg
+              className="h-28 w-28"
+              viewBox="0 0 96 96"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="48"
+                cy="48"
+                r="44"
+                stroke="#22c55e"
+                strokeWidth="4"
+                fill="rgba(34, 197, 94, 0.1)"
+                className="animate-[scale-in_0.4s_ease-out]"
+              />
+              <path
+                d="M28 50 L42 64 L68 34"
+                stroke="#22c55e"
+                strokeWidth="5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                fill="none"
+                style={{
+                  strokeDasharray: 80,
+                  strokeDashoffset: 80,
+                  animation: 'draw-check 0.5s 0.3s ease-out forwards',
+                }}
+              />
+            </svg>
+          </div>
+
+          <h2 className="text-2xl font-bold text-foreground">
+            Application Submitted Successfully
+          </h2>
+
+          <p className="text-center text-muted-foreground max-w-md">
+            Your cannabis license application has been received by the Cannabis Control & Regulatory Authority. Please save your reference number below.
+          </p>
+
+          <div className="rounded-xl bg-green-600/10 border border-green-600/20 px-8 py-4 text-center">
+            <p className="text-xs text-muted-foreground mb-1">Application Reference Number</p>
+            <div className="flex items-center gap-3">
+              <p className="text-2xl font-mono font-bold text-green-600 tracking-wider">
+                {refNumber}
+              </p>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(refNumber)
+                  toast.success('Copied to clipboard')
+                }}
+                className="p-1.5 rounded-md hover:bg-green-600/10 transition-colors"
+                title="Copy reference number"
+              >
+                <Copy className="h-4 w-4 text-green-600" />
+              </button>
+            </div>
+          </div>
+
+          <div className="rounded-lg bg-muted/50 border border-border p-4 max-w-md text-sm text-muted-foreground space-y-2">
+            <p><strong>What happens next?</strong></p>
+            <ul className="space-y-1 list-disc list-inside">
+              <li>Your application will be screened within <strong>5 business days</strong></li>
+              <li>You may receive a Request for Information (RFI) if documents need clarification</li>
+              <li>Security clearance and site inspection will be scheduled</li>
+              <li>Track your application status on the public portal using your reference number</li>
+            </ul>
+          </div>
+
+          <div className="flex items-center gap-3 mt-2">
+            <a
+              href="/public-portal"
+              className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-green-700 transition-colors"
+            >
+              Go to Public Portal
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+        </div>
+
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes draw-check {
+            to { stroke-dashoffset: 0; }
+          }
+          @keyframes scale-in {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+          }
+        ` }} />
+      </GlassCard>
+    )
+  }
+
+  // ── Wizard ──
   return (
     <GlassCard className="w-full" padding="lg">
       {/* Title */}

@@ -3,6 +3,7 @@
 import { useCallback, useMemo } from 'react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
 import { getProvinces, getDistricts, getTehsils } from '@/config/pakistan-locations'
 import type { PakistanAddress } from '@/types/license'
 
@@ -11,6 +12,7 @@ interface PakistanAddressInputProps {
   onChange: (address: PakistanAddress) => void
   includeGPS?: boolean
   errors?: Partial<Record<keyof PakistanAddress, string>>
+  highlightErrors?: string[]
 }
 
 export function PakistanAddressInput({
@@ -18,7 +20,9 @@ export function PakistanAddressInput({
   onChange,
   includeGPS = false,
   errors,
+  highlightErrors = [],
 }: PakistanAddressInputProps) {
+  const selectError = 'ring-2 ring-red-500/50 border-red-500'
   const provinces = useMemo(() => getProvinces(), [])
   const districts = useMemo(() => getDistricts(value.province), [value.province])
   const tehsils = useMemo(() => getTehsils(value.province, value.district), [value.province, value.district])
@@ -45,7 +49,7 @@ export function PakistanAddressInput({
           <select
             value={value.province}
             onChange={(e) => update('province', e.target.value)}
-            className="flex h-9 w-full rounded-md border border-white/10 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-green-500"
+            className={cn("flex h-9 w-full rounded-md border border-white/10 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-green-500", highlightErrors.includes('province') || highlightErrors.includes('siteProvince') ? selectError : '')}
           >
             <option value="" className="bg-background">Select Province</option>
             {provinces.map((p) => (
@@ -62,7 +66,7 @@ export function PakistanAddressInput({
             value={value.district}
             onChange={(e) => update('district', e.target.value)}
             disabled={!value.province}
-            className="flex h-9 w-full rounded-md border border-white/10 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-green-500 disabled:opacity-50"
+            className={cn("flex h-9 w-full rounded-md border border-white/10 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-green-500 disabled:opacity-50", highlightErrors.includes('district') || highlightErrors.includes('siteDistrict') ? selectError : '')}
           >
             <option value="" className="bg-background">Select District</option>
             {districts.map((d) => (

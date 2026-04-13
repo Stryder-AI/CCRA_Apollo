@@ -7,9 +7,14 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ENTITY_TYPES } from '@/config/constants'
 import { Shield } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export function StepBusinessEntity() {
-  const { businessEntity, setBusinessEntity } = useApplicationWizardStore()
+  const { businessEntity, setBusinessEntity, validationErrors } = useApplicationWizardStore()
+
+  const hasError = (field: string) => validationErrors.includes(field)
+
+  const inputError = 'ring-2 ring-red-500/50 border-red-500'
 
   return (
     <div className="space-y-6">
@@ -28,7 +33,9 @@ export function StepBusinessEntity() {
             onChange={(e) => setBusinessEntity({ legalEntityName: e.target.value })}
             placeholder="Registered legal name of entity"
             maxLength={200}
+            className={cn(hasError('legalEntityName') && inputError)}
           />
+          {hasError('legalEntityName') && <p className="text-xs text-red-400">This field is required</p>}
         </div>
 
         <div className="space-y-1.5">
@@ -54,11 +61,13 @@ export function StepBusinessEntity() {
               value={businessEntity.secpRegistrationNumber}
               onChange={(e) => setBusinessEntity({ secpRegistrationNumber: e.target.value })}
               placeholder="e.g. 0123456"
+              className={cn(hasError('secpRegistrationNumber') && inputError)}
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] text-muted-foreground bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded">
               <Shield className="size-2.5" /> SECP Verified
             </div>
           </div>
+          {hasError('secpRegistrationNumber') && <p className="text-xs text-red-400">This field is required</p>}
         </div>
 
         <div className="space-y-1.5">
@@ -68,11 +77,13 @@ export function StepBusinessEntity() {
               value={businessEntity.ntn}
               onChange={(e) => setBusinessEntity({ ntn: e.target.value })}
               placeholder="e.g. 1234567-8"
+              className={cn(hasError('ntn') && inputError)}
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] text-muted-foreground bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded">
               <Shield className="size-2.5" /> FBR Verified
             </div>
           </div>
+          {hasError('ntn') && <p className="text-xs text-red-400">This field is required</p>}
         </div>
 
         <div className="space-y-1.5">
@@ -90,7 +101,9 @@ export function StepBusinessEntity() {
             value={businessEntity.businessPhone}
             onChange={(e) => setBusinessEntity({ businessPhone: e.target.value })}
             placeholder="+92 XXX XXXXXXX"
+            className={cn(hasError('businessPhone') && inputError)}
           />
+          {hasError('businessPhone') && <p className="text-xs text-red-400">This field is required</p>}
         </div>
 
         <div className="space-y-1.5">
@@ -100,7 +113,9 @@ export function StepBusinessEntity() {
             value={businessEntity.businessEmail}
             onChange={(e) => setBusinessEntity({ businessEmail: e.target.value })}
             placeholder="contact@company.com"
+            className={cn(hasError('businessEmail') && inputError)}
           />
+          {hasError('businessEmail') && <p className="text-xs text-red-400">This field is required</p>}
         </div>
 
         <div className="space-y-1.5">
@@ -117,9 +132,13 @@ export function StepBusinessEntity() {
       {/* Registered Address */}
       <div className="space-y-2">
         <h3 className="text-sm font-semibold">Registered Office Address</h3>
+        {(hasError('province') || hasError('district')) && (
+          <p className="text-xs text-red-400">Province and District are required</p>
+        )}
         <PakistanAddressInput
           value={businessEntity.registeredAddress}
           onChange={(address) => setBusinessEntity({ registeredAddress: address })}
+          highlightErrors={validationErrors}
         />
       </div>
 

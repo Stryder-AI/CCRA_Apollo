@@ -55,6 +55,7 @@ export interface WizardState {
   // Wizard meta
   currentStep: number
   isDraft: boolean
+  validationErrors: string[]
 }
 
 interface WizardActions {
@@ -70,6 +71,8 @@ interface WizardActions {
   setPaymentMethod: (method: PaymentMethod) => void
   setCertification: (accepted: boolean) => void
   setCurrentStep: (step: number) => void
+  setValidationErrors: (errors: string[]) => void
+  clearValidationErrors: () => void
   resetWizard: () => void
   fillDemoValues: () => void
 }
@@ -107,6 +110,7 @@ const initialState: WizardState = {
   certificationAccepted: false,
   currentStep: 1,
   isDraft: false,
+  validationErrors: [],
 }
 
 export const useApplicationWizardStore = create<WizardState & WizardActions>((set) => ({
@@ -142,7 +146,9 @@ export const useApplicationWizardStore = create<WizardState & WizardActions>((se
   setFeeBreakdown: (fees) => set({ feeBreakdown: fees }),
   setPaymentMethod: (method) => set({ paymentMethod: method }),
   setCertification: (accepted) => set({ certificationAccepted: accepted }),
-  setCurrentStep: (step) => set({ currentStep: step }),
+  setValidationErrors: (errors) => set({ validationErrors: errors }),
+  clearValidationErrors: () => set({ validationErrors: [] }),
+  setCurrentStep: (step) => set({ currentStep: step, validationErrors: [] }),
   resetWizard: () => set(initialState),
   fillDemoValues: () => {
     // Lazy import to avoid circular deps and keep bundle small for non-demo users

@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { Check, Save, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { useApplicationWizardStore } from '@/store/useApplicationWizardStore'
+import { getStepErrors, FIELD_ERROR_LABELS } from '@/utils/wizard-validation'
 
 import { StepLicenseType } from './StepLicenseType'
 import { StepBusinessEntity } from './StepBusinessEntity'
@@ -29,58 +30,23 @@ const STEPS = [
 
 const TOTAL_STEPS = STEPS.length
 
-function validateStep(step: number, state: ReturnType<typeof useApplicationWizardStore.getState>): string | null {
-  switch (step) {
-    case 1:
-      if (!state.category) return 'Please select a license category'
-      if (!state.tier) return 'Please select a license tier'
-      return null
-    case 2:
-      if (!state.businessEntity.legalEntityName.trim()) return 'Legal entity name is required'
-      if (!state.businessEntity.secpRegistrationNumber.trim()) return 'SECP registration number is required'
-      if (!state.businessEntity.ntn.trim()) return 'NTN is required'
-      if (!state.businessEntity.businessPhone.trim()) return 'Business phone is required'
-      if (!state.businessEntity.businessEmail.trim()) return 'Business email is required'
-      if (!state.businessEntity.registeredAddress.province) return 'Province is required for registered address'
-      return null
-    case 3:
-      if (state.ownershipControl.shareholders.length === 0) return 'At least one shareholder is required'
-      if (state.ownershipControl.shareholders.some(s => !s.name.trim())) return 'All shareholder names are required'
-      return null
-    case 4:
-      if (!state.siteFacility.siteAddress.province) return 'Site province is required'
-      if (!state.siteFacility.siteAddress.district) return 'Site district is required'
-      return null
-    case 5:
-      if (!state.typeSpecificFields) return 'Please fill in the type-specific details'
-      return null
-    case 6:
-      return null // Documents are optional at draft stage
-    case 7:
-      if (!state.paymentMethod) return 'Please select a payment method'
-      return null
-    case 8:
-      if (!state.certificationAccepted) return 'You must accept the certification to submit'
-      return null
-    default:
-      return null
-  }
-}
-
 interface WizardShellProps {
   onSubmit: () => void
 }
 
 export function WizardShell({ onSubmit }: WizardShellProps) {
   const store = useApplicationWizardStore()
-  const { currentStep, setCurrentStep } = store
+  const { currentStep, setCurrentStep, setValidationErrors } = store
 
   const progressPercent = Math.round(((currentStep - 1) / (TOTAL_STEPS - 1)) * 100)
 
   const handleNext = () => {
-    const error = validateStep(currentStep, useApplicationWizardStore.getState())
-    if (error) {
-      toast.error('Validation Error', { description: error })
+    const state = useApplicationWizardStore.getState()
+    const errors = getStepErrors(currentStep, state)
+    if (errors.length > 0) {
+      setValidationErrors(errors)
+      const labels = errors.map(e => FIELD_ERROR_LABELS[e] || e).join(', ')
+      toast.error('Required fields missing', { description: labels })
       return
     }
     setCurrentStep(Math.min(currentStep + 1, TOTAL_STEPS))
@@ -97,16 +63,18 @@ export function WizardShell({ onSubmit }: WizardShellProps) {
   }
 
   const handleFinalSubmit = () => {
-    const error = validateStep(currentStep, useApplicationWizardStore.getState())
-    if (error) {
-      toast.error('Validation Error', { description: error })
+    const state = useApplicationWizardStore.getState()
+    const errors = getStepErrors(currentStep, state)
+    if (errors.length > 0) {
+      setValidationErrors(errors)
+      const labels = errors.map(e => FIELD_ERROR_LABELS[e] || e).join(', ')
+      toast.error('Required fields missing', { description: labels })
       return
     }
     onSubmit()
   }
 
   const handleStepClick = (step: number) => {
-    // Allow clicking on completed steps to go back
     if (step < currentStep) {
       setCurrentStep(step)
     }

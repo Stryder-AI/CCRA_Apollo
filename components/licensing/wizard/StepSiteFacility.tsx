@@ -8,7 +8,7 @@ import { LICENSE_TYPE_CONFIGS } from '@/config/license-type-config'
 import type { LicenseCategory, DocumentUpload } from '@/types/license'
 
 export function StepSiteFacility() {
-  const { category, siteFacility, setSiteFacility } = useApplicationWizardStore()
+  const { category, siteFacility, setSiteFacility, validationErrors } = useApplicationWizardStore()
 
   const config = category ? LICENSE_TYPE_CONFIGS[category] : null
 
@@ -27,6 +27,7 @@ export function StepSiteFacility() {
             value={siteFacility.siteAddress}
             onChange={(address) => setSiteFacility({ siteAddress: address })}
             includeGPS
+            highlightErrors={validationErrors}
           />
         </div>
       </div>

@@ -22,7 +22,7 @@ const PAYMENT_ICONS: Record<string, typeof CreditCard> = {
 
 export function StepFeePayment() {
   const {
-    category, tier, keyPersonnel, paymentMethod,
+    category, tier, keyPersonnel, paymentMethod, validationErrors,
     setFeeBreakdown, setPaymentMethod,
   } = useApplicationWizardStore()
 
@@ -113,7 +113,10 @@ export function StepFeePayment() {
 
       {/* Payment Method */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold">Select Payment Method</h3>
+        <h3 className={cn("text-sm font-semibold", validationErrors.includes('paymentMethod') && 'text-red-400')}>
+          Select Payment Method <span className="text-red-400">*</span>
+          {validationErrors.includes('paymentMethod') && <span className="font-normal ml-2">— Please select one</span>}
+        </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {PAYMENT_METHODS.map((method) => {
             const Icon = PAYMENT_ICONS[method] ?? CreditCard
