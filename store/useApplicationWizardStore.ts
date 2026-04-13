@@ -71,6 +71,7 @@ interface WizardActions {
   setCertification: (accepted: boolean) => void
   setCurrentStep: (step: number) => void
   resetWizard: () => void
+  fillDemoValues: () => void
 }
 
 const initialState: WizardState = {
@@ -143,4 +144,22 @@ export const useApplicationWizardStore = create<WizardState & WizardActions>((se
   setCertification: (accepted) => set({ certificationAccepted: accepted }),
   setCurrentStep: (step) => set({ currentStep: step }),
   resetWizard: () => set(initialState),
+  fillDemoValues: () => {
+    // Lazy import to avoid circular deps and keep bundle small for non-demo users
+    import('@/utils/demo-data').then((demo) => {
+      set({
+        category: 'CULTIVATION',
+        tier: 'STANDARD_MEDIUM',
+        businessEntity: demo.DEMO_BUSINESS_ENTITY,
+        ownershipControl: demo.DEMO_OWNERSHIP,
+        keyPersonnel: demo.DEMO_PERSONNEL,
+        siteFacility: demo.DEMO_SITE_FACILITY,
+        typeSpecificFields: demo.DEMO_TYPE_SPECIFIC,
+        commonDocuments: demo.getDemoCommonDocuments(),
+        feeBreakdown: demo.getDemoFeeBreakdown(),
+        paymentMethod: demo.DEMO_PAYMENT_METHOD,
+        certificationAccepted: true,
+      })
+    })
+  },
 }))

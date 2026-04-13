@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { GlassCard } from '@/design-system/glass-card'
 import { cn } from '@/lib/utils'
-import { Check, Save } from 'lucide-react'
+import { Check, Save, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { useApplicationWizardStore } from '@/store/useApplicationWizardStore'
 
@@ -211,6 +211,18 @@ export function WizardShell({ onSubmit }: WizardShellProps) {
           >
             <Save className="size-4 mr-1" />
             Save Draft
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              store.fillDemoValues()
+              toast.success('Demo values loaded', { description: 'All steps populated with sample data.' })
+            }}
+            className="text-amber-600 hover:text-amber-700 hover:bg-amber-500/10"
+          >
+            <Sparkles className="size-4 mr-1" />
+            Demo Values
           </Button>
         </div>
         {currentStep < TOTAL_STEPS ? (
