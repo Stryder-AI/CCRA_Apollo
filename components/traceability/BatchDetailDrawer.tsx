@@ -704,7 +704,7 @@ export function BatchDetailDrawer() {
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-0">
         {batch && (
           <>
-            <div className="sticky top-0 z-10 glass-heavy border-b border-border/50 px-6 pt-6 pb-4">
+            <div className="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-border/50 px-6 pt-6 pb-4">
               <BatchHeader batch={batch} />
             </div>
 
