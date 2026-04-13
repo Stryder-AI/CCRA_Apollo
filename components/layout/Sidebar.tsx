@@ -48,12 +48,15 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium',
-                isActive && 'nav-active',
+                'nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium overflow-hidden',
+                isActive && 'nav-active relative bg-ccra-green/[0.08] shadow-[inset_0_0_20px_rgba(34,197,94,0.05)]',
                 !isActive && 'text-muted-foreground',
                 collapsed && 'justify-center px-0'
               )}
             >
+              {isActive && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-gradient-to-b from-green-400 to-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+              )}
               <Icon className={cn('w-5 h-5 shrink-0', isActive && 'text-white')} />
               {!collapsed && <span className="truncate">{item.label}</span>}
             </Link>

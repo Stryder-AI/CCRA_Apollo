@@ -32,6 +32,8 @@ export function LicensesPieChart() {
                 paddingAngle={3}
                 dataKey="value"
                 stroke="none"
+                animationBegin={200}
+                animationDuration={1200}
               >
                 {data.map((_, index) => (
                   <Cell key={index} fill={COLORS[index % COLORS.length]} />

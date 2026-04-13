@@ -12,6 +12,13 @@ import { getLicenseCategoryShortLabel, getTierLabel } from '@/utils/license-help
 import { CheckSquare, Square, CheckCircle2, XCircle, Download, Clock } from 'lucide-react'
 import type { ApplicationStatus } from '@/types/license'
 
+const PULSING_STATUSES: Set<string> = new Set([
+  'UNDER_REVIEW_SCREENING',
+  'UNDER_REVIEW_TECHNICAL',
+  'SECURITY_CLEARANCE_PENDING',
+  'INSPECTION_SCHEDULED',
+])
+
 function getDaysUntilExpiry(expiryDate?: string): number | null {
   if (!expiryDate) return null
   const now = new Date()
@@ -46,7 +53,10 @@ function StatusBadge({ status }: { status: ApplicationStatus }) {
   if (!config) return <span className="text-xs">{status}</span>
   return (
     <span
-      className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border"
+      className={cn(
+        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border',
+        PULSING_STATUSES.has(status) && 'badge-pulse'
+      )}
       style={{
         backgroundColor: config.bgColor,
         color: config.color,
@@ -157,7 +167,12 @@ export function LicenseTable() {
                           : <Square className="h-4 w-4 text-muted-foreground" />
                         }
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs">{lic.licenseNumber}</td>
+                      <td className="px-4 py-3">
+                        <span className="font-mono text-xs text-muted-foreground hover:text-ccra-green transition-colors cursor-pointer relative group">
+                          {lic.licenseNumber}
+                          <span className="absolute -bottom-0.5 left-0 w-0 h-[1px] bg-ccra-green group-hover:w-full transition-all duration-300" />
+                        </span>
+                      </td>
                       <td className="px-4 py-3">
                         <div className="font-medium">{lic.applicantName}</div>
                         <div className="text-xs text-muted-foreground">{lic.companyName}</div>

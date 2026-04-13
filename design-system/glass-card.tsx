@@ -8,6 +8,7 @@ interface GlassCardProps {
   hover?: boolean
   glow?: 'green' | 'gold' | 'teal' | 'red' | 'none'
   padding?: 'none' | 'sm' | 'md' | 'lg'
+  gradientBorder?: boolean
   onClick?: () => void
 }
 
@@ -32,6 +33,7 @@ export function GlassCard({
   hover = false,
   glow = 'none',
   padding = 'md',
+  gradientBorder = false,
   onClick,
 }: GlassCardProps) {
   return (
@@ -43,9 +45,13 @@ export function GlassCard({
         hover && 'glass-hover cursor-pointer',
         hover && glowMap[glow],
         onClick && 'cursor-pointer',
+        gradientBorder && 'relative overflow-hidden',
         className
       )}
     >
+      {gradientBorder && (
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-green-500 via-emerald-400 to-teal-500 animate-gradient-x rounded-t-2xl" />
+      )}
       {children}
     </div>
   )

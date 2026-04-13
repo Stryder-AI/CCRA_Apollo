@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { PageTransition } from '@/design-system/page-transition'
-import { PageHeader } from '@/components/layout/PageHeader'
+import { PageHeader } from '@/design-system/page-header'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { InspectionTable } from '@/components/compliance/InspectionTable'
 import { ViolationTable } from '@/components/compliance/ViolationTable'
@@ -13,7 +13,7 @@ import { ComplianceRiskPredictor } from '@/components/compliance/ComplianceRiskP
 import { PenaltyCalculator } from '@/components/compliance/PenaltyCalculator'
 import { PermissionGate } from '@/components/auth/PermissionGate'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, ShieldCheck } from 'lucide-react'
 
 export default function CompliancePage() {
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false)
@@ -21,8 +21,9 @@ export default function CompliancePage() {
   return (
     <PageTransition>
       <PageHeader
-        title="Compliance & Inspection"
-        description="Manage inspections, track violations, and monitor regulatory compliance"
+        title="Compliance & Inspections"
+        subtitle="Monitor regulatory compliance across all licensed operations"
+        icon={ShieldCheck}
       >
         <PermissionGate permission="canScheduleInspections">
           <Button onClick={() => setScheduleModalOpen(true)} size="sm">

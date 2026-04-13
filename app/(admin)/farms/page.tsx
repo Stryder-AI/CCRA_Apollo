@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { PageTransition } from '@/design-system/page-transition'
-import { PageHeader } from '@/components/layout/PageHeader'
+import { PageHeader } from '@/design-system/page-header'
 import { FarmMap } from '@/components/farms/FarmMap'
 import { FarmListView } from '@/components/farms/FarmListView'
 import { FarmFilters } from '@/components/farms/FarmFilters'
@@ -11,7 +11,7 @@ import { AddFarmModal } from '@/components/farms/AddFarmModal'
 import { Button } from '@/components/ui/button'
 import { PermissionGate } from '@/components/auth/PermissionGate'
 import { useFarmStore } from '@/store/useFarmStore'
-import { Map, List, Plus } from 'lucide-react'
+import { Map, List, Plus, Sprout } from 'lucide-react'
 
 export default function FarmsPage() {
   const viewMode = useFarmStore((s) => s.viewMode)
@@ -22,7 +22,8 @@ export default function FarmsPage() {
     <PageTransition>
       <PageHeader
         title="Farm Registry"
-        description="GIS map and registry of all licensed cultivation farms"
+        subtitle="Monitor and manage all registered cannabis cultivation sites"
+        icon={Sprout}
       >
         {/* View toggle */}
         <div className="flex items-center rounded-lg border border-border bg-muted/40 p-0.5">

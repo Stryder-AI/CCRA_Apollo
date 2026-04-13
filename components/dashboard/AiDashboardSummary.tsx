@@ -12,6 +12,7 @@ export function AiDashboardSummary() {
   return (
     <GlassCard
       padding="md"
+      gradientBorder
       className="border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-500/5 to-transparent"
     >
       <div className="flex items-start gap-4">

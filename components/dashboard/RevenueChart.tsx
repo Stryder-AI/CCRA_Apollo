@@ -63,6 +63,8 @@ export function RevenueChart() {
               fill="#22c55e"
               radius={[4, 4, 0, 0]}
               maxBarSize={32}
+              animationBegin={300}
+              animationDuration={1000}
             />
             <Bar
               dataKey="expense"
@@ -70,6 +72,8 @@ export function RevenueChart() {
               fill="#e5e7eb"
               radius={[4, 4, 0, 0]}
               maxBarSize={32}
+              animationBegin={300}
+              animationDuration={1000}
             />
           </BarChart>
         </ResponsiveContainer>

@@ -526,3 +526,51 @@
   font-weight: 600;
   letter-spacing: -0.025em;
 }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.badge-pulse {
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(10px, -10px); }
+  50% { transform: translate(-5px, 15px); }
+  75% { transform: translate(15px, 5px); }
+}
+
+@keyframes drift-reverse {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-10px, 10px); }
+  50% { transform: translate(5px, -15px); }
+  75% { transform: translate(-15px, -5px); }
+}
+
+@keyframes bell-shake {
+  0%, 85%, 100% { transform: rotate(0); }
+  87% { transform: rotate(8deg); }
+  89% { transform: rotate(-8deg); }
+  91% { transform: rotate(6deg); }
+  93% { transform: rotate(-4deg); }
+  95% { transform: rotate(2deg); }
+  97% { transform: rotate(0deg); }
+}
+
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-8deg); }
+  30% { transform: rotate(14deg); }
+  40% { transform: rotate(-4deg); }
+  50% { transform: rotate(10deg); }
+  60%, 100% { transform: rotate(0deg); }
+}
