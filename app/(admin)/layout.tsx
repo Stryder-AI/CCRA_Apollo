@@ -21,18 +21,18 @@ export default function AdminLayout({
     <div className="min-h-screen relative">
       {/* Green gradient background */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-        {/* Base white */}
-        <div className="absolute inset-0 bg-[#f8fdf8]" />
+        {/* Base */}
+        <div className="absolute inset-0 bg-[#f8fdf8] dark:bg-[#0a0f0a]" />
         {/* Top-left green sweep */}
-        <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[60%] rounded-full bg-gradient-to-br from-green-300/60 via-green-200/40 to-transparent blur-[80px] animate-[drift_20s_ease-in-out_infinite]" />
+        <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[60%] rounded-full bg-gradient-to-br from-green-300/60 via-green-200/40 to-transparent dark:from-green-900/50 dark:via-green-950/30 blur-[80px] animate-[drift_20s_ease-in-out_infinite]" />
         {/* Top-right green accent */}
-        <div className="absolute -top-[10%] -right-[5%] w-[50%] h-[50%] rounded-full bg-gradient-to-bl from-green-300/50 via-lime-200/30 to-transparent blur-[100px] animate-[drift-reverse_25s_ease-in-out_infinite]" />
+        <div className="absolute -top-[10%] -right-[5%] w-[50%] h-[50%] rounded-full bg-gradient-to-bl from-green-300/50 via-lime-200/30 to-transparent dark:from-green-900/40 dark:via-emerald-950/25 blur-[100px] animate-[drift-reverse_25s_ease-in-out_infinite]" />
         {/* Bottom-right flowing curve */}
-        <div className="absolute -bottom-[15%] -right-[10%] w-[60%] h-[50%] rounded-full bg-gradient-to-tl from-green-300/50 via-lime-200/30 to-transparent blur-[90px] animate-[drift_30s_ease-in-out_infinite]" />
+        <div className="absolute -bottom-[15%] -right-[10%] w-[60%] h-[50%] rounded-full bg-gradient-to-tl from-green-300/50 via-lime-200/30 to-transparent dark:from-green-900/40 dark:via-emerald-950/25 blur-[90px] animate-[drift_30s_ease-in-out_infinite]" />
         {/* Bottom-left subtle */}
-        <div className="absolute -bottom-[10%] -left-[5%] w-[40%] h-[40%] rounded-full bg-gradient-to-tr from-green-200/30 via-emerald-100/20 to-transparent blur-[80px] animate-[drift-reverse_22s_ease-in-out_infinite]" />
-        {/* Center light glow */}
-        <div className="absolute top-[30%] left-[30%] w-[50%] h-[40%] rounded-full bg-white/80 blur-[100px] animate-[drift_28s_ease-in-out_infinite]" />
+        <div className="absolute -bottom-[10%] -left-[5%] w-[40%] h-[40%] rounded-full bg-gradient-to-tr from-green-200/30 via-emerald-100/20 to-transparent dark:from-green-950/30 dark:via-emerald-950/15 blur-[80px] animate-[drift-reverse_22s_ease-in-out_infinite]" />
+        {/* Center glow */}
+        <div className="absolute top-[30%] left-[30%] w-[50%] h-[40%] rounded-full bg-white/80 dark:bg-green-950/20 blur-[100px] animate-[drift_28s_ease-in-out_infinite]" />
       </div>
 
       <Sidebar />
